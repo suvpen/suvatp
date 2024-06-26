@@ -20,7 +20,7 @@ func (atpClient *ATPClient) QueryLabel(cursor string) (*ozone.ModerationQueryEve
 	resp, err := ozone.ModerationQueryEvents(
 		context.TODO(), atpClient.LabelerClient,
 		nil, nil, "", "", "",
-		"", cursor, false, false, 3,
+		"", cursor, false, false, 100,
 		nil, nil, nil, "", "",
 		[]string{"tools.ozone.moderation.defs#modEventLabel"})
 	if err != nil {
