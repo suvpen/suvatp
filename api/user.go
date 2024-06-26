@@ -20,8 +20,8 @@ func (atpClient *ATPClient) GetProfile(didOrHandle string) (*bsky.ActorDefs_Prof
 	return profile, nil
 }
 
-func (atpClient *ATPClient) SearchActors(q, cursor string) (*bsky.ActorSearchActors_Output, error) {
-	profile, err := bsky.ActorSearchActors(context.TODO(), atpClient.Client, cursor, 10, q, "")
+func (atpClient *ATPClient) SearchActors(q, cursor string, limit int64) (*bsky.ActorSearchActors_Output, error) {
+	profile, err := bsky.ActorSearchActors(context.TODO(), atpClient.Client, cursor, limit, q, "")
 	if err != nil {
 		return nil, fmt.Errorf("error searching actors with q=%s: %w", q, err)
 	}

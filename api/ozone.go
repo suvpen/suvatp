@@ -7,8 +7,8 @@ import (
 	"github.com/bluesky-social/indigo/api/ozone"
 )
 
-func (atpClient *ATPClient) SearchRepos(q, cursor string) (*ozone.ModerationSearchRepos_Output, error) {
-	resp, err := ozone.ModerationSearchRepos(context.TODO(), atpClient.LabelerClient, cursor, 100, q, "")
+func (atpClient *ATPClient) SearchRepos(q, cursor string, limit int64) (*ozone.ModerationSearchRepos_Output, error) {
+	resp, err := ozone.ModerationSearchRepos(context.TODO(), atpClient.LabelerClient, cursor, limit, q, "")
 	if err != nil {
 		return nil, fmt.Errorf("error while searching repos of %s: %w", q, err)
 	}
@@ -16,11 +16,11 @@ func (atpClient *ATPClient) SearchRepos(q, cursor string) (*ozone.ModerationSear
 	return resp, nil
 }
 
-func (atpClient *ATPClient) QueryLabel(cursor string) (*ozone.ModerationQueryEvents_Output, error) {
+func (atpClient *ATPClient) QueryLabel(cursor string, limit int64) (*ozone.ModerationQueryEvents_Output, error) {
 	resp, err := ozone.ModerationQueryEvents(
 		context.TODO(), atpClient.LabelerClient,
 		nil, nil, "", "", "",
-		"", cursor, false, false, 100,
+		"", cursor, false, false, limit,
 		nil, nil, nil, "", "",
 		[]string{"tools.ozone.moderation.defs#modEventLabel"})
 	if err != nil {
