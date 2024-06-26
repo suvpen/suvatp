@@ -12,7 +12,7 @@ type MessageInput struct {
 
 func (atpClient *ATPClient) ListConvos(cursor string, limit int64) (*chat.ConvoListConvos_Output, error) {
 	resp, err := chat.ConvoListConvos(
-		context.TODO(), atpClient.Client, cursor, limit)
+		context.TODO(), atpClient.PdsClient, cursor, limit)
 	if err != nil {
 		return nil, fmt.Errorf("error getting chat list: %w", err)
 	}
@@ -21,7 +21,7 @@ func (atpClient *ATPClient) ListConvos(cursor string, limit int64) (*chat.ConvoL
 }
 
 func (atpClient *ATPClient) GetLog(cursor string) (*chat.ConvoGetLog_Output, error) {
-	resp, err := chat.ConvoGetLog(context.TODO(), atpClient.Client, cursor)
+	resp, err := chat.ConvoGetLog(context.TODO(), atpClient.PdsClient, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("error getting chat log: %w", err)
 	}
@@ -30,7 +30,7 @@ func (atpClient *ATPClient) GetLog(cursor string) (*chat.ConvoGetLog_Output, err
 }
 
 func (atpClient *ATPClient) SendMessage(msgInput *chat.ConvoSendMessage_Input) (*chat.ConvoDefs_MessageView, error) {
-	resp, err := chat.ConvoSendMessage(context.TODO(), atpClient.Client, msgInput)
+	resp, err := chat.ConvoSendMessage(context.TODO(), atpClient.PdsClient, msgInput)
 	if err != nil {
 		return nil, fmt.Errorf("error sending message: %w", err)
 	}
@@ -39,7 +39,7 @@ func (atpClient *ATPClient) SendMessage(msgInput *chat.ConvoSendMessage_Input) (
 }
 
 func (atpClient *ATPClient) SendMessageBatch(msgInputs *chat.ConvoSendMessageBatch_Input) (*chat.ConvoSendMessageBatch_Output, error) {
-	resp, err := chat.ConvoSendMessageBatch(context.TODO(), atpClient.Client, msgInputs)
+	resp, err := chat.ConvoSendMessageBatch(context.TODO(), atpClient.PdsClient, msgInputs)
 	if err != nil {
 		return nil, fmt.Errorf("error sending message batch: %w", err)
 	}

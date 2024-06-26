@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/bluesky-social/indigo v0.0.0-20240621215756-9ee0a266c9ff
+	github.com/kr/pretty v0.2.0
 	golang.org/x/net v0.26.0
 	golang.org/x/text v0.16.0
 )
@@ -34,6 +35,7 @@ require (
 	github.com/ipfs/go-metrics-interface v0.0.1 // indirect
 	github.com/jbenet/goprocess v0.1.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect

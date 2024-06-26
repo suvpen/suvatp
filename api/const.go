@@ -4,7 +4,7 @@ const (
 	ATPDir                = ".atp"
 	ATPClientAuthJsonFile = ".atp/%s_%s_auth.json"
 
-	DefaultPDS = "https://bsky.social"
+	DefaultATProtoEndpoint = "https://bsky.social"
 
 	DefaultProfilesCollection = "app.bsky.actor.profile"
 	DefaultPostsCollection    = "app.bsky.feed.post"

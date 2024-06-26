@@ -14,8 +14,26 @@ import (
 	"time"
 )
 
+type DidDoc struct {
+	Context            []string `json:"@context"`
+	Id                 string   `json:"id"`
+	AlsoKnownAs        []string `json:"alsoKnownAs"`
+	VerificationMethod []struct {
+		Id                 string `json:"id"`
+		Type               string `json:"type"`
+		Controller         string `json:"controller"`
+		PublicKeyMultibase string `json:"publicKeyMultibase"`
+	} `json:"verificationMethod"`
+	Service []struct {
+		Id              string `json:"id"`
+		Type            string `json:"type"`
+		ServiceEndpoint string `json:"serviceEndpoint"`
+	} `json:"service"`
+}
+
 type Config struct {
-	Pds                string `json:"pds"`
+	ATProtoEndpoint    string `json:"at_proto_endpoint"`
+	PDSEndpoint        string `json:"pds_endpoint"`
 	ProfilesCollection string `json:"profiles_collection"`
 	PostsCollection    string `json:"posts_collection"`
 	RepostsCollection  string `json:"reposts_collection"`
@@ -27,6 +45,7 @@ type Config struct {
 type ATPClient struct {
 	Config      *Config `json:"config"`
 	Client      *xrpc.Client
+	PdsClient   *xrpc.Client
 	Did         string
 	AppPassword string
 }
@@ -41,6 +60,7 @@ type Jwt struct {
 
 func writeAuthFile(clientAuthFilePath string, atpClient ATPClient) error {
 	atpClient.Client.Client = nil
+	atpClient.PdsClient.Client = nil
 
 	clientAuthJson, err := json.Marshal(atpClient)
 	if err != nil {
@@ -66,6 +86,10 @@ func refreshSession(atpClient *ATPClient, clientAuthFilePath string) (*ATPClient
 	atpClient.Client.Auth.Did = refresh.Did
 	atpClient.Client.Auth.AccessJwt = refresh.AccessJwt
 	atpClient.Client.Auth.RefreshJwt = refresh.RefreshJwt
+
+	atpClient.PdsClient.Auth.Did = refresh.Did
+	atpClient.PdsClient.Auth.AccessJwt = refresh.AccessJwt
+	atpClient.PdsClient.Auth.RefreshJwt = refresh.RefreshJwt
 
 	err = writeAuthFile(clientAuthFilePath, *atpClient)
 	if err != nil {
@@ -100,7 +124,7 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 	atpClient := &ATPClient{
 		Client: &xrpc.Client{
 			Client: new(http.Client),
-			Host:   config.Pds,
+			Host:   config.ATProtoEndpoint,
 		},
 		Did:         did,
 		AppPassword: appPassword,
@@ -116,6 +140,18 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 		return nil, fmt.Errorf("unable to connect: %w", err)
 	}
 
+	resultJson, err := json.Marshal(*session.DidDoc)
+	if err != nil {
+		return nil, err
+	}
+
+	var didDoc *DidDoc
+	err = json.Unmarshal(resultJson, &didDoc)
+	if err != nil {
+		return nil, err
+	}
+
+	//ATPROTO CLIENT
 	atpClient.Config = config
 	atpClient.Client.Auth = &xrpc.AuthInfo{
 		AccessJwt:  session.AccessJwt,
@@ -123,6 +159,23 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 		Handle:     session.Handle,
 		Did:        session.Did,
 	}
+
+	//PDS CLIENT
+	atpClient.Config.PDSEndpoint = didDoc.Service[0].ServiceEndpoint
+	atpClient.PdsClient = &xrpc.Client{
+		Client: new(http.Client),
+		Host:   didDoc.Service[0].ServiceEndpoint,
+	}
+	atpClient.PdsClient.Auth = &xrpc.AuthInfo{
+		AccessJwt:  session.AccessJwt,
+		RefreshJwt: session.RefreshJwt,
+		Handle:     session.Handle,
+		Did:        session.Did,
+	}
+
+	seeds := make(map[string]string)
+	seeds["Atproto-Proxy"] = "did:web:api.bsky.chat#bsky_chat"
+	atpClient.PdsClient.Headers = seeds
 
 	err = writeAuthFile(clientAuthFilePath, *atpClient)
 	if err != nil {
@@ -154,7 +207,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 
 	if config == nil {
 		config = &Config{
-			Pds:                DefaultPDS,
+			ATProtoEndpoint:    DefaultATProtoEndpoint,
 			ProfilesCollection: DefaultProfilesCollection,
 			PostsCollection:    DefaultPostsCollection,
 			RepostsCollection:  DefaultRepostsCollection,
@@ -164,7 +217,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 		}
 	}
 
-	clientAuthFilePath, err := getClientAuthFile(config.Pds, did)
+	clientAuthFilePath, err := getClientAuthFile(config.ATProtoEndpoint, did)
 	if err != nil {
 		return nil, err
 	}
@@ -199,6 +252,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 		}
 
 		atpClient.Client.Client = new(http.Client)
+		atpClient.PdsClient.Client = new(http.Client)
 
 		if jwtIsExpired {
 			atpClient, err = refreshSession(atpClient, clientAuthFilePath)
