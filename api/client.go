@@ -43,11 +43,12 @@ type Config struct {
 }
 
 type ATPClient struct {
-	Config      *Config `json:"config"`
-	Client      *xrpc.Client
-	PdsClient   *xrpc.Client
-	Did         string
-	AppPassword string
+	Config        *Config `json:"config"`
+	Client        *xrpc.Client
+	PdsClient     *xrpc.Client
+	LabelerClient *xrpc.Client
+	Did           string
+	AppPassword   string
 }
 
 type Jwt struct {
@@ -61,6 +62,7 @@ type Jwt struct {
 func writeAuthFile(clientAuthFilePath string, atpClient ATPClient) error {
 	atpClient.Client.Client = nil
 	atpClient.PdsClient.Client = nil
+	atpClient.LabelerClient.Client = nil
 
 	clientAuthJson, err := json.Marshal(atpClient)
 	if err != nil {
@@ -87,9 +89,8 @@ func refreshSession(atpClient *ATPClient, clientAuthFilePath string) (*ATPClient
 	atpClient.Client.Auth.AccessJwt = refresh.AccessJwt
 	atpClient.Client.Auth.RefreshJwt = refresh.RefreshJwt
 
-	atpClient.PdsClient.Auth.Did = refresh.Did
-	atpClient.PdsClient.Auth.AccessJwt = refresh.AccessJwt
-	atpClient.PdsClient.Auth.RefreshJwt = refresh.RefreshJwt
+	atpClient.PdsClient.Auth = atpClient.Client.Auth
+	atpClient.LabelerClient.Auth = atpClient.Client.Auth
 
 	err = writeAuthFile(clientAuthFilePath, *atpClient)
 	if err != nil {
@@ -166,16 +167,24 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 		Client: new(http.Client),
 		Host:   didDoc.Service[0].ServiceEndpoint,
 	}
-	atpClient.PdsClient.Auth = &xrpc.AuthInfo{
-		AccessJwt:  session.AccessJwt,
-		RefreshJwt: session.RefreshJwt,
-		Handle:     session.Handle,
-		Did:        session.Did,
-	}
+	atpClient.PdsClient.Auth = atpClient.Client.Auth
 
 	seeds := make(map[string]string)
 	seeds["Atproto-Proxy"] = "did:web:api.bsky.chat#bsky_chat"
 	atpClient.PdsClient.Headers = seeds
+
+	//LABELER CLIENT
+	if len(didDoc.Service) > 1 {
+		atpClient.LabelerClient = &xrpc.Client{
+			Client: new(http.Client),
+			Host:   didDoc.Service[0].ServiceEndpoint,
+		}
+		atpClient.LabelerClient.Auth = atpClient.Client.Auth
+
+		seeds = make(map[string]string)
+		seeds["Atproto-Proxy"] = "did:plc:yojwcfgpkxq35sv5wioglqad#atproto_labeler"
+		atpClient.LabelerClient.Headers = seeds
+	}
 
 	err = writeAuthFile(clientAuthFilePath, *atpClient)
 	if err != nil {
@@ -253,6 +262,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 
 		atpClient.Client.Client = new(http.Client)
 		atpClient.PdsClient.Client = new(http.Client)
+		atpClient.LabelerClient.Client = new(http.Client)
 
 		if jwtIsExpired {
 			atpClient, err = refreshSession(atpClient, clientAuthFilePath)

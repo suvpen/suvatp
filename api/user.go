@@ -20,6 +20,15 @@ func (atpClient *ATPClient) GetProfile(didOrHandle string) (*bsky.ActorDefs_Prof
 	return profile, nil
 }
 
+func (atpClient *ATPClient) SearchActors(q, cursor string) (*bsky.ActorSearchActors_Output, error) {
+	profile, err := bsky.ActorSearchActors(context.TODO(), atpClient.Client, cursor, 10, q, "")
+	if err != nil {
+		return nil, fmt.Errorf("error searching actors with q=%s: %w", q, err)
+	}
+
+	return profile, nil
+}
+
 func (atpClient *ATPClient) GetFollows(cursor string) (*bsky.GraphGetFollows_Output, error) {
 	follows, err := bsky.GraphGetFollows(context.TODO(), atpClient.Client, atpClient.Client.Auth.Did, cursor, 100)
 	if err != nil {
