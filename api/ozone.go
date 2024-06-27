@@ -36,6 +36,7 @@ func (atpClient *ATPClient) LabelAccount(adminDid, targetDid, label string) (*oz
 		Event: &ozone.ModerationEmitEvent_Input_Event{
 			ModerationDefs_ModEventLabel: &ozone.ModerationDefs_ModEventLabel{
 				CreateLabelVals: []string{label},
+				NegateLabelVals: []string{},
 			},
 		},
 		Subject: &ozone.ModerationEmitEvent_Input_Subject{
@@ -58,6 +59,7 @@ func (atpClient *ATPClient) NegateAccountLabel(adminDid, targetDid, label string
 		CreatedBy: adminDid,
 		Event: &ozone.ModerationEmitEvent_Input_Event{
 			ModerationDefs_ModEventLabel: &ozone.ModerationDefs_ModEventLabel{
+				CreateLabelVals: []string{},
 				NegateLabelVals: []string{label},
 			},
 		},
