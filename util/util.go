@@ -54,3 +54,12 @@ func GetRecordKeyFromUrl(url string) string {
 	uriSplit := strings.Split(url, "/")
 	return uriSplit[len(uriSplit)-1]
 }
+
+func GetDidFromAtUri(atUri string) string {
+	linkParts := strings.Split(strings.ToLower(atUri), "/")
+	if len(linkParts) != 5 {
+		return ""
+	}
+
+	return linkParts[2]
+}
