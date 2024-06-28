@@ -77,3 +77,24 @@ func (atpClient *ATPClient) NegateAccountLabel(adminDid, targetDid, label string
 
 	return resp, nil
 }
+
+func (atpClient *ATPClient) Acknowledge(adminDid, targetDid string) (*ozone.ModerationDefs_ModEventView, error) {
+	eventInput := &ozone.ModerationEmitEvent_Input{
+		CreatedBy: adminDid,
+		Event: &ozone.ModerationEmitEvent_Input_Event{
+			ModerationDefs_ModEventAcknowledge: &ozone.ModerationDefs_ModEventAcknowledge{},
+		},
+		Subject: &ozone.ModerationEmitEvent_Input_Subject{
+			AdminDefs_RepoRef: &atproto.AdminDefs_RepoRef{
+				Did: targetDid,
+			},
+		},
+	}
+
+	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
+	if err != nil {
+		return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+	}
+
+	return resp, nil
+}
