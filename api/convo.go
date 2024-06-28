@@ -10,6 +10,15 @@ type MessageInput struct {
 	Text string `json:"text"`
 }
 
+func (atpClient *ATPClient) GetConvoForMembers(targetDid string) (*chat.ConvoGetConvoForMembers_Output, error) {
+	resp, err := chat.ConvoGetConvoForMembers(context.TODO(), atpClient.PdsClient, []string{targetDid})
+	if err != nil {
+		return nil, fmt.Errorf("error getting convo for members %s : %w", targetDid, err)
+	}
+
+	return resp, nil
+}
+
 func (atpClient *ATPClient) ListConvos(cursor string, limit int64) (*chat.ConvoListConvos_Output, error) {
 	resp, err := chat.ConvoListConvos(
 		context.TODO(), atpClient.PdsClient, cursor, limit)
