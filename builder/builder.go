@@ -139,30 +139,12 @@ func BuildMessageBatch(atpClient *api.ATPClient, msgsData []MessageData) (*chat.
 	var msgItems []*chat.ConvoSendMessageBatch_BatchItem
 
 	for _, msgData := range msgsData {
-		msgItem := &chat.ConvoSendMessageBatch_BatchItem{
-			ConvoId: msgData.ConvoId,
-			Message: &chat.ConvoDefs_MessageInput{
-				Text: msgData.Text,
-			},
+		msg, err := BuildMessage(atpClient, msgData)
+		if err != nil {
+			return nil, fmt.Errorf("error building message batch: %w", err)
 		}
 
-		if msgData.PostCid != "" && msgData.PostUri != "" {
-			msgItem.Message.Embed = &chat.ConvoDefs_MessageInput_Embed{
-				EmbedRecord: &bsky.EmbedRecord{
-					Record: &atproto.RepoStrongRef{Cid: msgData.PostCid, Uri: msgData.PostUri},
-				}}
-		} else if msgData.PostUrl != "" {
-			postRecord, err := atpClient.
-				GetPost(util.GetHandleFromURL(msgData.PostUrl), util.GetRecordKeyFromUrl(msgData.PostUrl))
-			if err == nil {
-				msgItem.Message.Embed = &chat.ConvoDefs_MessageInput_Embed{
-					EmbedRecord: &bsky.EmbedRecord{
-						Record: &atproto.RepoStrongRef{Cid: *postRecord.Cid, Uri: postRecord.Uri},
-					}}
-			}
-		}
-
-		msgItems = append(msgItems, msgItem)
+		msgItems = append(msgItems, &chat.ConvoSendMessageBatch_BatchItem{ConvoId: msg.ConvoId, Message: msg.Message})
 	}
 
 	return &chat.ConvoSendMessageBatch_Input{Items: msgItems}, nil
