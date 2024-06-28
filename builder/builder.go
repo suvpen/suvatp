@@ -174,7 +174,7 @@ func injectFacets(atpClient *api.ATPClient, text string) ([]*bsky.RichtextFacet,
 			continue
 		}
 
-		profile, err := atpClient.GetProfile(ent.Text)
+		did, err := atpClient.ResolveHandle(ent.Text)
 		if err != nil {
 			if atperr.ErrorInvalidActorDidOrHandle(err) || atperr.ErrorProfileNotFound(err) {
 				continue
@@ -186,7 +186,7 @@ func injectFacets(atpClient *api.ATPClient, text string) ([]*bsky.RichtextFacet,
 			Features: []*bsky.RichtextFacet_Features_Elem{
 				{
 					RichtextFacet_Mention: &bsky.RichtextFacet_Mention{
-						Did: profile.Did,
+						Did: did,
 					},
 				},
 			},

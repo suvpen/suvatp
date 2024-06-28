@@ -11,6 +11,15 @@ import (
 	"time"
 )
 
+func (atpClient *ATPClient) ResolveHandle(handle string) (string, error) {
+	resp, err := atproto.IdentityResolveHandle(context.TODO(), atpClient.Client, handle)
+	if err != nil {
+		return "", fmt.Errorf("error get %s handle: %w", handle, err)
+	}
+
+	return resp.Did, nil
+}
+
 func (atpClient *ATPClient) GetProfile(didOrHandle string) (*bsky.ActorDefs_ProfileViewDetailed, error) {
 	profile, err := bsky.ActorGetProfile(context.TODO(), atpClient.Client, didOrHandle)
 	if err != nil {
@@ -62,12 +71,12 @@ func (atpClient *ATPClient) FollowDid(did string) (*atproto.RepoCreateRecord_Out
 }
 
 func (atpClient *ATPClient) FollowHandle(handle string) (*atproto.RepoCreateRecord_Output, error) {
-	profile, err := atpClient.GetProfile(handle)
+	did, err := atpClient.ResolveHandle(handle)
 	if err != nil {
 		return nil, fmt.Errorf("error following handle %s: %w", handle, err)
 	}
 
-	return atpClient.FollowDid(profile.Did)
+	return atpClient.FollowDid(did)
 }
 
 func (atpClient *ATPClient) Unfollow(didOrHandle string) error {
@@ -107,12 +116,12 @@ func (atpClient *ATPClient) MuteDid(did string) error {
 }
 
 func (atpClient *ATPClient) MuteHandle(handle string) error {
-	profile, err := atpClient.GetProfile(handle)
+	did, err := atpClient.ResolveHandle(handle)
 	if err != nil {
 		return fmt.Errorf("error muting handle %s: %w", handle, err)
 	}
 
-	return atpClient.MuteDid(profile.Did)
+	return atpClient.MuteDid(did)
 }
 
 func (atpClient *ATPClient) BlockDid(did string) (*atproto.RepoCreateRecord_Output, error) {
@@ -135,12 +144,12 @@ func (atpClient *ATPClient) BlockDid(did string) (*atproto.RepoCreateRecord_Outp
 }
 
 func (atpClient *ATPClient) BlockHandle(handle string) (*atproto.RepoCreateRecord_Output, error) {
-	profile, err := atpClient.GetProfile(handle)
+	did, err := atpClient.ResolveHandle(handle)
 	if err != nil {
 		return nil, fmt.Errorf("error blocking handle %s: %w", handle, err)
 	}
 
-	return atpClient.BlockDid(profile.Did)
+	return atpClient.BlockDid(did)
 }
 
 func (atpClient *ATPClient) Unblock(didOrHandle string) error {
