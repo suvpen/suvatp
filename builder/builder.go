@@ -26,12 +26,18 @@ type PostData struct {
 	ImagePaths         []string
 	QuoteUrl, EmbedUrl string
 	CreatedAt          time.Time
+	MentionInput       []*MentionInput
 }
 
 type MessageData struct {
 	ConvoId                   string
 	Text                      string
 	PostCid, PostUri, PostUrl string
+	MentionInput              []*MentionInput
+}
+
+type MentionInput struct {
+	Did, Handle string
 }
 
 func BuildPost(atpClient *api.ATPClient, postData PostData) (*bsky.FeedPost, error) {
@@ -74,7 +80,7 @@ func BuildPost(atpClient *api.ATPClient, postData PostData) (*bsky.FeedPost, err
 		}
 	}
 
-	injectedFacets, err := injectFacets(atpClient, post.Text)
+	injectedFacets, err := injectFacets(atpClient, post.Text, postData.MentionInput)
 	if err != nil {
 		return nil, fmt.Errorf("error injecting facets: %w", err)
 	}
@@ -125,7 +131,7 @@ func BuildMessage(atpClient *api.ATPClient, msgData MessageData) (*chat.ConvoSen
 		}
 	}
 
-	injectedFacets, err := injectFacets(atpClient, msgData.Text)
+	injectedFacets, err := injectFacets(atpClient, msgData.Text, msgData.MentionInput)
 	if err != nil {
 		return nil, fmt.Errorf("error building message: error injecting facets: %w", err)
 	}
@@ -150,7 +156,7 @@ func BuildMessageBatch(atpClient *api.ATPClient, msgsData []MessageData) (*chat.
 	return &chat.ConvoSendMessageBatch_Input{Items: msgItems}, nil
 }
 
-func injectFacets(atpClient *api.ATPClient, text string) ([]*bsky.RichtextFacet, error) {
+func injectFacets(atpClient *api.ATPClient, text string, mentionInput []*MentionInput) ([]*bsky.RichtextFacet, error) {
 	var facets []*bsky.RichtextFacet
 
 	for _, ent := range util.ExtractLinksBytes(text) {
@@ -169,19 +175,35 @@ func injectFacets(atpClient *api.ATPClient, text string) ([]*bsky.RichtextFacet,
 		})
 	}
 
-	for _, ent := range util.ExtractMentionsBytes(text) {
+	extractedMentions := util.ExtractMentionsBytes(text)
+	for i, ent := range extractedMentions {
 		if !strings.Contains(ent.Text, ".") {
 			continue
 		}
 
-		did, err := atpClient.ResolveHandle(ent.Text)
-		if err != nil {
-			if atperr.ErrorInvalidActorDidOrHandle(err) || atperr.ErrorProfileNotFound(err) {
-				continue
-			} else {
-				return nil, err
+		var did string
+
+		if len(mentionInput) == len(extractedMentions) {
+			if !strings.Contains(mentionInput[i].Handle, "@") {
+				mentionInput[i].Handle = fmt.Sprintf("@%s", mentionInput[i].Handle)
 			}
+
+			if ent.Text == mentionInput[i].Handle {
+				did = mentionInput[i].Did
+			}
+		} else {
+			respDid, err := atpClient.ResolveHandle(ent.Text)
+			if err != nil {
+				if atperr.ErrorInvalidActorDidOrHandle(err) || atperr.ErrorProfileNotFound(err) {
+					continue
+				} else {
+					return nil, err
+				}
+			}
+
+			did = respDid
 		}
+
 		facets = append(facets, &bsky.RichtextFacet{
 			Features: []*bsky.RichtextFacet_Features_Elem{
 				{
