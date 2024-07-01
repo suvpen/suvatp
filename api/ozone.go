@@ -30,6 +30,20 @@ func (atpClient *ATPClient) QueryLabel(cursor string, limit int64) (*ozone.Moder
 	return resp, nil
 }
 
+func (atpClient *ATPClient) QueryOpenReports(cursor string, limit int64) (*ozone.ModerationQueryStatuses_Output, error) {
+	resp, err := ozone.ModerationQueryStatuses(
+		context.TODO(), atpClient.LabelerClient,
+		false, "", cursor, nil, nil,
+		true, "", limit, "", "",
+		"tools.ozone.moderation.defs#reviewOpen", "", "", "desc", "lastReportedAt",
+		"", nil, false)
+	if err != nil {
+		return nil, fmt.Errorf("error querying open reports: %w", err)
+	}
+
+	return resp, nil
+}
+
 func (atpClient *ATPClient) LabelAccount(adminDid, targetDid, label string) (*ozone.ModerationDefs_ModEventView, error) {
 	eventInput := &ozone.ModerationEmitEvent_Input{
 		CreatedBy: adminDid,
@@ -54,6 +68,31 @@ func (atpClient *ATPClient) LabelAccount(adminDid, targetDid, label string) (*oz
 	return resp, nil
 }
 
+func (atpClient *ATPClient) LabelPost(adminDid, cid, uri, label string) (*ozone.ModerationDefs_ModEventView, error) {
+	eventInput := &ozone.ModerationEmitEvent_Input{
+		CreatedBy: adminDid,
+		Event: &ozone.ModerationEmitEvent_Input_Event{
+			ModerationDefs_ModEventLabel: &ozone.ModerationDefs_ModEventLabel{
+				CreateLabelVals: []string{label},
+				NegateLabelVals: []string{},
+			},
+		},
+		Subject: &ozone.ModerationEmitEvent_Input_Subject{
+			RepoStrongRef: &atproto.RepoStrongRef{
+				Cid: cid,
+				Uri: uri,
+			},
+		},
+	}
+
+	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
+	if err != nil {
+		return nil, fmt.Errorf("error labeling post %s: %w", uri, err)
+	}
+
+	return resp, nil
+}
+
 func (atpClient *ATPClient) NegateAccountLabel(adminDid, targetDid, label string) (*ozone.ModerationDefs_ModEventView, error) {
 	eventInput := &ozone.ModerationEmitEvent_Input{
 		CreatedBy: adminDid,
@@ -73,6 +112,31 @@ func (atpClient *ATPClient) NegateAccountLabel(adminDid, targetDid, label string
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
 		return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+	}
+
+	return resp, nil
+}
+
+func (atpClient *ATPClient) NegatePostLabel(adminDid, cid, uri, label string) (*ozone.ModerationDefs_ModEventView, error) {
+	eventInput := &ozone.ModerationEmitEvent_Input{
+		CreatedBy: adminDid,
+		Event: &ozone.ModerationEmitEvent_Input_Event{
+			ModerationDefs_ModEventLabel: &ozone.ModerationDefs_ModEventLabel{
+				CreateLabelVals: []string{},
+				NegateLabelVals: []string{label},
+			},
+		},
+		Subject: &ozone.ModerationEmitEvent_Input_Subject{
+			RepoStrongRef: &atproto.RepoStrongRef{
+				Cid: cid,
+				Uri: uri,
+			},
+		},
+	}
+
+	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
+	if err != nil {
+		return nil, fmt.Errorf("error labeling post %s: %w", uri, err)
 	}
 
 	return resp, nil
