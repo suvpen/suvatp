@@ -142,7 +142,7 @@ func (atpClient *ATPClient) NegatePostLabel(adminDid, cid, uri, label string) (*
 	return resp, nil
 }
 
-func (atpClient *ATPClient) Acknowledge(adminDid, targetDid string) (*ozone.ModerationDefs_ModEventView, error) {
+func (atpClient *ATPClient) AcknowledgeAccountRecord(adminDid, targetDid string) (*ozone.ModerationDefs_ModEventView, error) {
 	eventInput := &ozone.ModerationEmitEvent_Input{
 		CreatedBy: adminDid,
 		Event: &ozone.ModerationEmitEvent_Input_Event{
@@ -157,7 +157,29 @@ func (atpClient *ATPClient) Acknowledge(adminDid, targetDid string) (*ozone.Mode
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+		return nil, fmt.Errorf("error acknowledging %s account record: %w", targetDid, err)
+	}
+
+	return resp, nil
+}
+
+func (atpClient *ATPClient) AcknowledgePostRecord(adminDid, cid, uri string) (*ozone.ModerationDefs_ModEventView, error) {
+	eventInput := &ozone.ModerationEmitEvent_Input{
+		CreatedBy: adminDid,
+		Event: &ozone.ModerationEmitEvent_Input_Event{
+			ModerationDefs_ModEventAcknowledge: &ozone.ModerationDefs_ModEventAcknowledge{},
+		},
+		Subject: &ozone.ModerationEmitEvent_Input_Subject{
+			RepoStrongRef: &atproto.RepoStrongRef{
+				Cid: cid,
+				Uri: uri,
+			},
+		},
+	}
+
+	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
+	if err != nil {
+		return nil, fmt.Errorf("error acknowledging %s post record: %w", uri, err)
 	}
 
 	return resp, nil

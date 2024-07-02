@@ -6,10 +6,6 @@ import (
 	"github.com/bluesky-social/indigo/api/chat"
 )
 
-type MessageInput struct {
-	Text string `json:"text"`
-}
-
 func (atpClient *ATPClient) GetConvoForMembers(targetDid string) (*chat.ConvoGetConvoForMembers_Output, error) {
 	resp, err := chat.ConvoGetConvoForMembers(context.TODO(), atpClient.PdsClient, []string{targetDid})
 	if err != nil {
