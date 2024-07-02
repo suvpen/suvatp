@@ -184,10 +184,6 @@ func injectFacets(atpClient *api.ATPClient, text string, mentionInput []*Mention
 		var did string
 
 		if len(mentionInput) == len(extractedMentions) {
-			if !strings.Contains(mentionInput[i].Handle, "@") {
-				mentionInput[i].Handle = fmt.Sprintf("@%s", mentionInput[i].Handle)
-			}
-
 			if ent.Text == mentionInput[i].Handle {
 				did = mentionInput[i].Did
 			}
