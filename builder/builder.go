@@ -183,6 +183,10 @@ func injectFacets(atpClient *api.ATPClient, text string, mentionInput []*Mention
 
 		var did string
 
+		if string(ent.Text[len(ent.Text)-1]) == "." {
+			ent.Text = ent.Text[:len(ent.Text)-1]
+		}
+
 		if len(mentionInput) == len(extractedMentions) {
 			if ent.Text == mentionInput[i].Handle {
 				did = mentionInput[i].Did
