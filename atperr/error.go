@@ -16,6 +16,8 @@ const (
 	ErrorInvalidFollowDIDMessage        = "Record/subject must be a valid did"
 	ErrorParamMustHavePropActorMessage  = `Params must have the property`
 
+	ErrorRecipientNotFollowingYou = "InvalidRequest: recipient requires incoming messages to come from someone they follow"
+
 	ErrorUpstreamFailureMessage = "UpstreamFailure: Upstream Failure"
 	ErrorUpstreamTimeoutMessage = "UpstreamTimeout: Upload timed out, please try again"
 
@@ -25,66 +27,70 @@ const (
 	ErrorBlobTooLargeMessage         = "BlobTooLarge: This file is too large"
 )
 
-func ErrorInternalServerError(err error) bool {
+func IsInternalServerError(err error) bool {
 	return strings.Contains(err.Error(), ErrorInternalServerErrorMessage)
 }
 
-func ErrorInvalidDIDOrPassword(err error) bool {
+func IsInvalidDIDOrPasswordError(err error) bool {
 	return strings.Contains(err.Error(), ErrorInvalidDIDOrPasswordMessage)
 }
 
-func ErrorAuthFactorTokenRequired(err error) bool {
+func IsAuthFactorTokenRequiredError(err error) bool {
 	return strings.Contains(err.Error(), ErrorAuthFactorTokenRequiredMessage)
 }
 
-func ErrorTokenExpired(err error) bool {
+func IsTokenExpiredError(err error) bool {
 	return strings.Contains(err.Error(), ErrorTokenExpiredMessage)
 }
 
-func ErrorTokenRevoked(err error) bool {
+func IsTokenRevokedError(err error) bool {
 	return strings.Contains(err.Error(), ErrorTokenRevokedMessage)
 }
 
-func ErrorProfileNotFound(err error) bool {
+func IsProfileNotFoundError(err error) bool {
 	return strings.Contains(err.Error(), ErrorProfileNotFoundMessage)
 }
 
-func ErrorInvalidActorDidOrHandle(err error) bool {
+func IsInvalidActorDidOrHandleError(err error) bool {
 	return strings.Contains(err.Error(), ErrorInvalidActorDidOrHandleMessage)
 }
 
-func ErrorAccountDeactivated(err error) bool {
+func IsAccountDeactivatedError(err error) bool {
 	return strings.Contains(err.Error(), ErrorAccountDeactivatedMessage)
 }
 
-func ErrorInvalidFollowDID(err error) bool {
+func IsInvalidFollowDidError(err error) bool {
 	return strings.Contains(err.Error(), ErrorInvalidFollowDIDMessage)
 }
 
-func ErrorParamMustHavePropActor(err error) bool {
+func IsParamMustHavePropActorError(err error) bool {
 	return strings.Contains(err.Error(), ErrorParamMustHavePropActorMessage)
 }
 
-func ErrorUpstreamFailure(err error) bool {
+func IsRecipientNotFollowingYouError(err error) bool {
+	return strings.Contains(err.Error(), ErrorRecipientNotFollowingYou)
+}
+
+func IsUpstreamFailureError(err error) bool {
 	return strings.Contains(err.Error(), ErrorUpstreamFailureMessage)
 }
 
-func ErrorUpstreamTimeout(err error) bool {
+func IsUpstreamTimeoutError(err error) bool {
 	return strings.Contains(err.Error(), ErrorUpstreamTimeoutMessage)
 }
 
-func ErrorInvalidRepo(err error) bool {
+func IsInvalidRepoError(err error) bool {
 	return strings.Contains(err.Error(), ErrorInvalidRepoMessage)
 }
 
-func ErrorCouldNotFindRepo(err error) bool {
+func IsCouldNotFindRepoError(err error) bool {
 	return strings.Contains(err.Error(), ErrorCouldNotFindRepoMessage)
 }
 
-func ErrorCouldNotLocateRecord(err error) bool {
+func IsCouldNotLocateRecordError(err error) bool {
 	return strings.Contains(err.Error(), ErrorCouldNotLocateRecordMessage)
 }
 
-func ErrorBlobTooLarge(err error) bool {
+func IsBlobTooLargeError(err error) bool {
 	return strings.Contains(err.Error(), ErrorBlobTooLargeMessage)
 }
