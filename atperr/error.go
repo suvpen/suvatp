@@ -3,94 +3,94 @@ package atperr
 import "strings"
 
 const (
-	ErrorInternalServerErrorMessage = "InternalServerError: Internal Server Error"
+	errorInternalServerErrorMessage = "InternalServerError: Internal Server Error"
 
-	ErrorInvalidDIDOrPasswordMessage    = "AuthenticationRequired: Invalid identifier or password"
-	ErrorAuthFactorTokenRequiredMessage = "AuthFactorTokenRequired: A sign in code has been sent to your email address"
-	ErrorTokenExpiredMessage            = "ExpiredToken: Token has expired"
-	ErrorTokenRevokedMessage            = "Token has been revoked"
+	errorInvalidDIDOrPasswordMessage    = "AuthenticationRequired: Invalid identifier or password"
+	errorAuthFactorTokenRequiredMessage = "AuthFactorTokenRequired: A sign in code has been sent to your email address"
+	errorTokenExpiredMessage            = "ExpiredToken: Token has expired"
+	errorTokenRevokedMessage            = "Token has been revoked"
 
-	ErrorProfileNotFoundMessage         = "InvalidRequest: Profile not found"
-	ErrorInvalidActorDidOrHandleMessage = "InvalidRequest: Error: actor must be a valid did or a handle"
-	ErrorAccountDeactivatedMessage      = "AccountDeactivated: Account is deactivated"
-	ErrorInvalidFollowDIDMessage        = "Record/subject must be a valid did"
-	ErrorParamMustHavePropActorMessage  = `Params must have the property`
+	errorProfileNotFoundMessage         = "InvalidRequest: Profile not found"
+	errorInvalidActorDidOrHandleMessage = "InvalidRequest: Error: actor must be a valid did or a handle"
+	errorAccountDeactivatedMessage      = "AccountDeactivated: Account is deactivated"
+	errorInvalidFollowDIDMessage        = "Record/subject must be a valid did"
+	errorParamMustHavePropActorMessage  = `Params must have the property`
 
-	ErrorRecipientNotFollowingYou = "InvalidRequest: recipient requires incoming messages to come from someone they follow"
+	errorRecipientNotFollowingYou = "InvalidRequest: recipient requires incoming messages to come from someone they follow"
 
-	ErrorUpstreamFailureMessage = "UpstreamFailure: Upstream Failure"
-	ErrorUpstreamTimeoutMessage = "UpstreamTimeout: Upload timed out, please try again"
+	errorUpstreamFailureMessage = "UpstreamFailure: Upstream Failure"
+	errorUpstreamTimeoutMessage = "UpstreamTimeout: Upload timed out, please try again"
 
-	ErrorInvalidRepoMessage          = "InvalidRequest: Error: repo must be a valid did or a handle"
-	ErrorCouldNotFindRepoMessage     = "InvalidRequest: Could not find repo"
-	ErrorCouldNotLocateRecordMessage = "InvalidRequest: Could not locate record"
-	ErrorBlobTooLargeMessage         = "BlobTooLarge: This file is too large"
+	errorInvalidRepoMessage          = "InvalidRequest: Error: repo must be a valid did or a handle"
+	errorCouldNotFindRepoMessage     = "InvalidRequest: Could not find repo"
+	errorCouldNotLocateRecordMessage = "InvalidRequest: Could not locate record"
+	errorBlobTooLargeMessage         = "BlobTooLarge: This file is too large"
 )
 
 func IsInternalServerError(err error) bool {
-	return strings.Contains(err.Error(), ErrorInternalServerErrorMessage)
+	return strings.Contains(err.Error(), errorInternalServerErrorMessage)
 }
 
 func IsInvalidDIDOrPasswordError(err error) bool {
-	return strings.Contains(err.Error(), ErrorInvalidDIDOrPasswordMessage)
+	return strings.Contains(err.Error(), errorInvalidDIDOrPasswordMessage)
 }
 
 func IsAuthFactorTokenRequiredError(err error) bool {
-	return strings.Contains(err.Error(), ErrorAuthFactorTokenRequiredMessage)
+	return strings.Contains(err.Error(), errorAuthFactorTokenRequiredMessage)
 }
 
 func IsTokenExpiredError(err error) bool {
-	return strings.Contains(err.Error(), ErrorTokenExpiredMessage)
+	return strings.Contains(err.Error(), errorTokenExpiredMessage)
 }
 
 func IsTokenRevokedError(err error) bool {
-	return strings.Contains(err.Error(), ErrorTokenRevokedMessage)
+	return strings.Contains(err.Error(), errorTokenRevokedMessage)
 }
 
 func IsProfileNotFoundError(err error) bool {
-	return strings.Contains(err.Error(), ErrorProfileNotFoundMessage)
+	return strings.Contains(err.Error(), errorProfileNotFoundMessage)
 }
 
 func IsInvalidActorDidOrHandleError(err error) bool {
-	return strings.Contains(err.Error(), ErrorInvalidActorDidOrHandleMessage)
+	return strings.Contains(err.Error(), errorInvalidActorDidOrHandleMessage)
 }
 
 func IsAccountDeactivatedError(err error) bool {
-	return strings.Contains(err.Error(), ErrorAccountDeactivatedMessage)
+	return strings.Contains(err.Error(), errorAccountDeactivatedMessage)
 }
 
 func IsInvalidFollowDidError(err error) bool {
-	return strings.Contains(err.Error(), ErrorInvalidFollowDIDMessage)
+	return strings.Contains(err.Error(), errorInvalidFollowDIDMessage)
 }
 
 func IsParamMustHavePropActorError(err error) bool {
-	return strings.Contains(err.Error(), ErrorParamMustHavePropActorMessage)
+	return strings.Contains(err.Error(), errorParamMustHavePropActorMessage)
 }
 
 func IsRecipientNotFollowingYouError(err error) bool {
-	return strings.Contains(err.Error(), ErrorRecipientNotFollowingYou)
+	return strings.Contains(err.Error(), errorRecipientNotFollowingYou)
 }
 
 func IsUpstreamFailureError(err error) bool {
-	return strings.Contains(err.Error(), ErrorUpstreamFailureMessage)
+	return strings.Contains(err.Error(), errorUpstreamFailureMessage)
 }
 
 func IsUpstreamTimeoutError(err error) bool {
-	return strings.Contains(err.Error(), ErrorUpstreamTimeoutMessage)
+	return strings.Contains(err.Error(), errorUpstreamTimeoutMessage)
 }
 
 func IsInvalidRepoError(err error) bool {
-	return strings.Contains(err.Error(), ErrorInvalidRepoMessage)
+	return strings.Contains(err.Error(), errorInvalidRepoMessage)
 }
 
 func IsCouldNotFindRepoError(err error) bool {
-	return strings.Contains(err.Error(), ErrorCouldNotFindRepoMessage)
+	return strings.Contains(err.Error(), errorCouldNotFindRepoMessage)
 }
 
 func IsCouldNotLocateRecordError(err error) bool {
-	return strings.Contains(err.Error(), ErrorCouldNotLocateRecordMessage)
+	return strings.Contains(err.Error(), errorCouldNotLocateRecordMessage)
 }
 
 func IsBlobTooLargeError(err error) bool {
-	return strings.Contains(err.Error(), ErrorBlobTooLargeMessage)
+	return strings.Contains(err.Error(), errorBlobTooLargeMessage)
 }
