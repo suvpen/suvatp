@@ -44,6 +44,20 @@ func (atpClient *ATPClient) QueryOpenReports(cursor string, limit int64) (*ozone
 	return resp, nil
 }
 
+func (atpClient *ATPClient) QueryEventDetail(subject string) (*ozone.ModerationQueryEvents_Output, error) {
+	resp, err := ozone.ModerationQueryEvents(
+		context.TODO(), atpClient.LabelerClient,
+		nil, nil, "", "", "",
+		"", "", false, false, 2,
+		nil, nil, nil, "", subject,
+		nil)
+	if err != nil {
+		return nil, fmt.Errorf("error querying label events: %w", err)
+	}
+
+	return resp, nil
+}
+
 func (atpClient *ATPClient) LabelAccount(adminDid, targetDid, label string) (*ozone.ModerationDefs_ModEventView, error) {
 	eventInput := &ozone.ModerationEmitEvent_Input{
 		CreatedBy: adminDid,
