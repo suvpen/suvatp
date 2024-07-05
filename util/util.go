@@ -28,12 +28,12 @@ func CreateBskyProfileURL(handle string) string {
 	return fmt.Sprintf("https://bsky.app/profile/%s", handle)
 }
 
-func CreateBskyPostURL(handle, rkey string) string {
-	if handle == "" || rkey == "" {
+func CreateBskyPostURL(didOrHandle, rkey string) string {
+	if didOrHandle == "" || rkey == "" {
 		return "-"
 	}
 
-	return fmt.Sprintf("https://bsky.app/profile/%s/post/%s", handle, rkey)
+	return fmt.Sprintf("https://bsky.app/profile/%s/post/%s", didOrHandle, rkey)
 }
 
 func GetHandleFromURL(atpUrl string) string {
@@ -50,11 +50,6 @@ func GetHandleFromURL(atpUrl string) string {
 	}
 }
 
-func GetRecordKeyFromUrl(url string) string {
-	uriSplit := strings.Split(url, "/")
-	return uriSplit[len(uriSplit)-1]
-}
-
 func GetDidFromAtUri(atUri string) string {
 	linkParts := strings.Split(strings.ToLower(atUri), "/")
 	if len(linkParts) != 5 {
@@ -62,4 +57,9 @@ func GetDidFromAtUri(atUri string) string {
 	}
 
 	return linkParts[2]
+}
+
+func GetRecordKeyFromUrlOrAtUri(urlOrUri string) string {
+	urlSplit := strings.Split(urlOrUri, "/")
+	return urlSplit[len(urlSplit)-1]
 }

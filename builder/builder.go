@@ -56,7 +56,7 @@ func BuildPost(atpClient *api.ATPClient, postData PostData) (*bsky.FeedPost, err
 
 	if postData.QuoteUrl != "" {
 		resp, err := atpClient.
-			GetPost(util.GetHandleFromURL(postData.QuoteUrl), util.GetRecordKeyFromUrl(postData.QuoteUrl))
+			GetPost(util.GetHandleFromURL(postData.QuoteUrl), util.GetRecordKeyFromUrlOrAtUri(postData.QuoteUrl))
 		if err != nil {
 			return nil, fmt.Errorf("error building post: invalid QuoteUrl record: %w", err)
 		}
@@ -122,7 +122,7 @@ func BuildMessage(atpClient *api.ATPClient, msgData MessageData) (*chat.ConvoSen
 			}}
 	} else if msgData.PostUrl != "" {
 		postRecord, err := atpClient.
-			GetPost(util.GetHandleFromURL(msgData.PostUrl), util.GetRecordKeyFromUrl(msgData.PostUrl))
+			GetPost(util.GetHandleFromURL(msgData.PostUrl), util.GetRecordKeyFromUrlOrAtUri(msgData.PostUrl))
 		if err == nil {
 			msgInput.Message.Embed = &chat.ConvoDefs_MessageInput_Embed{
 				EmbedRecord: &bsky.EmbedRecord{
