@@ -91,6 +91,18 @@ func (atpClient *ATPClient) GetLikes(didOrHandle, rKey, cursor string) (*bsky.Fe
 	return resp, nil
 }
 
+func (atpClient *ATPClient) SearchPost(q, cursor string, limit int64) (*bsky.FeedSearchPosts_Output, error) {
+	resp, err := bsky.FeedSearchPosts(
+		context.TODO(), atpClient.Client, "", cursor, "", "",
+		limit, "", q, "", "",
+		nil, "", "")
+	if err != nil {
+		return nil, fmt.Errorf("error getting record: %w", err)
+	}
+
+	return resp, nil
+}
+
 func (atpClient *ATPClient) Post(post *bsky.FeedPost) (*atproto.RepoCreateRecord_Output, error) {
 	resp, err := atproto.RepoCreateRecord(context.TODO(), atpClient.Client, &atproto.RepoCreateRecord_Input{
 		Collection: atpClient.Config.PostsCollection,
