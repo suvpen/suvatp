@@ -11,6 +11,64 @@ import (
 	"time"
 )
 
+func (atpClient *ATPClient) GetPreferences() (*bsky.ActorGetPreferences_Output, error) {
+	resp, err := bsky.ActorGetPreferences(context.TODO(), atpClient.Client)
+	if err != nil {
+		return nil, fmt.Errorf("error getting preferences: %w", err)
+	}
+
+	return resp, nil
+}
+
+func (atpClient *ATPClient) SubscribeLabeler(did string) error {
+	lastPrefs, err := atpClient.GetPreferences()
+	if err != nil {
+		return fmt.Errorf("error subscribing preferences: %w", err)
+	}
+
+	input := &bsky.ActorPutPreferences_Input{
+		Preferences: lastPrefs.Preferences,
+	}
+
+	input.Preferences = append(input.Preferences, bsky.ActorDefs_Preferences_Elem{
+		ActorDefs_LabelersPref: &bsky.ActorDefs_LabelersPref{
+			Labelers: []*bsky.ActorDefs_LabelerPrefItem{
+				{
+					Did: did,
+				},
+			},
+		},
+	})
+
+	err = bsky.ActorPutPreferences(context.TODO(), atpClient.Client, input)
+	if err != nil {
+		return fmt.Errorf("error subscribing preferences: %w", err)
+	}
+
+	return nil
+}
+
+func (atpClient *ATPClient) LikeLabeler(cid, did string) (*atproto.RepoCreateRecord_Output, error) {
+	repostResp, err := atproto.RepoCreateRecord(context.TODO(), atpClient.Client, &atproto.RepoCreateRecord_Input{
+		Collection: atpClient.Config.LikesCollection,
+		Repo:       atpClient.Client.Auth.Did,
+		Record: &lexutil.LexiconTypeDecoder{
+			Val: &bsky.FeedLike{
+				CreatedAt: time.Now().Local().Format(time.RFC3339),
+				Subject: &atproto.RepoStrongRef{
+					Cid: cid,
+					Uri: fmt.Sprintf("at://%s/%s/self", did, atpClient.Config.LabelerService),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error liking labeler: %w", err)
+	}
+
+	return repostResp, nil
+}
+
 func (atpClient *ATPClient) ResolveHandle(handle string) (string, error) {
 	resp, err := atproto.IdentityResolveHandle(context.TODO(), atpClient.Client, handle)
 	if err != nil {

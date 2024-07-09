@@ -203,8 +203,8 @@ func (atpClient *ATPClient) Like(didOrHandle, rKey string) (*atproto.RepoCreateR
 			Val: &bsky.FeedLike{
 				CreatedAt: time.Now().Local().Format(time.RFC3339),
 				Subject: &atproto.RepoStrongRef{
-					Uri: postRecord.Uri,
 					Cid: *postRecord.Cid,
+					Uri: postRecord.Uri,
 				},
 			},
 		},

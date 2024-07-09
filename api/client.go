@@ -40,6 +40,7 @@ type Config struct {
 	LikesCollection    string `json:"likes_collection"`
 	GraphFollowLexicon string `json:"graph_follow_lexicon"`
 	GraphBlockLexicon  string `json:"graph_block_lexicon"`
+	LabelerService     string `json:"labeler_service"`
 }
 
 type ATPClient struct {
@@ -174,11 +175,9 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 	atpClient.PdsClient.Headers = seeds
 
 	//LABELER CLIENT
+	atpClient.LabelerClient = &xrpc.Client{Client: new(http.Client)}
 	if len(didDoc.Service) > 1 {
-		atpClient.LabelerClient = &xrpc.Client{
-			Client: new(http.Client),
-			Host:   didDoc.Service[0].ServiceEndpoint,
-		}
+		atpClient.LabelerClient.Host = didDoc.Service[0].ServiceEndpoint
 		atpClient.LabelerClient.Auth = atpClient.Client.Auth
 
 		seeds = make(map[string]string)
@@ -223,6 +222,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 			LikesCollection:    DefaultLikeCollection,
 			GraphFollowLexicon: DefaultGraphFollowLexicon,
 			GraphBlockLexicon:  DefaultGraphBlockLexicon,
+			LabelerService:     DefaultLabelerService,
 		}
 	}
 

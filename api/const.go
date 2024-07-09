@@ -12,6 +12,7 @@ const (
 	DefaultLikeCollection     = "app.bsky.feed.like"
 	DefaultGraphFollowLexicon = "app.bsky.graph.follow"
 	DefaultGraphBlockLexicon  = "app.bsky.graph.block"
+	DefaultLabelerService     = "app.bsky.labeler.service"
 )
 
 const (
