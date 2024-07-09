@@ -23,6 +23,7 @@ import (
 
 type PostData struct {
 	Text               string
+	EmbedImages        []*bsky.EmbedImages_Image
 	ImagePaths         []string
 	QuoteUrl, EmbedUrl string
 	CreatedAt          time.Time
@@ -87,7 +88,15 @@ func BuildPost(atpClient *api.ATPClient, postData PostData) (*bsky.FeedPost, err
 
 	post.Facets = injectedFacets
 
-	if len(postData.ImagePaths) > 0 {
+	if len(postData.EmbedImages) > 0 {
+		if post.Embed == nil {
+			post.Embed = &bsky.FeedPost_Embed{}
+		}
+
+		post.Embed.EmbedImages = &bsky.EmbedImages{
+			Images: postData.EmbedImages,
+		}
+	} else if len(postData.ImagePaths) > 0 {
 		images, err := atpClient.UploadImages(postData.ImagePaths)
 		if err != nil {
 			return nil, err
