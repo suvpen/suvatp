@@ -124,6 +124,7 @@ func getJWTExpiration(atpClient *ATPClient, clientAuthFilePath string) (bool, er
 
 func createSession(did, appPassword, clientAuthFilePath string, config *Config) (*ATPClient, error) {
 	atpClient := &ATPClient{
+		Config: config,
 		Client: &xrpc.Client{
 			Client: new(http.Client),
 			Host:   config.ATProtoEndpoint,
@@ -154,7 +155,6 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 	}
 
 	//ATPROTO CLIENT
-	atpClient.Config = config
 	atpClient.Client.Auth = &xrpc.AuthInfo{
 		AccessJwt:  session.AccessJwt,
 		RefreshJwt: session.RefreshJwt,
@@ -193,10 +193,10 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 	return atpClient, nil
 }
 
-func getClientAuthFile(pds, did string) (string, error) {
-	pdsName := strings.Replace(pds, "https://", "", 1)
+func getClientAuthFile(atpEndpoint, did string) (string, error) {
+	atpName := strings.Replace(atpEndpoint, "https://", "", 1)
 	didFileName := strings.Replace(did, "did:plc:", "", 1)
-	clientAuthFilePath := fmt.Sprintf(ATPClientAuthJsonFile, pdsName, didFileName)
+	clientAuthFilePath := fmt.Sprintf(ATPClientAuthJsonFile, atpName, didFileName)
 
 	_ = os.Mkdir(ATPDir, os.ModePerm)
 
