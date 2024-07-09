@@ -25,6 +25,7 @@ const (
 	errorCouldNotFindRepoMessage     = "InvalidRequest: Could not find repo"
 	errorCouldNotLocateRecordMessage = "InvalidRequest: Could not locate record"
 	errorBlobTooLargeMessage         = "BlobTooLarge: This file is too large"
+	errorCouldNotFindBlob            = "BlobNotFound: Could not find blob"
 )
 
 func IsInternalServerError(err error) bool {
@@ -93,4 +94,8 @@ func IsCouldNotLocateRecordError(err error) bool {
 
 func IsBlobTooLargeError(err error) bool {
 	return strings.Contains(err.Error(), errorBlobTooLargeMessage)
+}
+
+func IsCouldNotFindBlob(err error) bool {
+	return strings.Contains(err.Error(), errorCouldNotFindBlob)
 }
