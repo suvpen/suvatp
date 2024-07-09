@@ -138,6 +138,19 @@ func (atpClient *ATPClient) ReplyPost(cid, uri string, post *bsky.FeedPost) (*at
 	return resp, nil
 }
 
+func (atpClient *ATPClient) DeletePost(rKey string) error {
+	err := atproto.RepoDeleteRecord(context.TODO(), atpClient.Client, &atproto.RepoDeleteRecord_Input{
+		Collection: atpClient.Config.PostsCollection,
+		Repo:       atpClient.Client.Auth.Did,
+		Rkey:       rKey,
+	})
+	if err != nil {
+		return fmt.Errorf("error deleting post: %w", err)
+	}
+
+	return nil
+}
+
 func (atpClient *ATPClient) Repost(didOrHandle, rKey string) (*atproto.RepoCreateRecord_Output, error) {
 	postRecord, err := atpClient.GetPost(didOrHandle, rKey)
 	if err != nil {

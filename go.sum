@@ -6,6 +6,8 @@ github.com/andybalholm/cascadia v1.3.2/go.mod h1:7gtRlve5FxPPgIgX36uWBX58OdBsSS6
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/bluesky-social/indigo v0.0.0-20240621215756-9ee0a266c9ff h1:eHOSTVOq4HVWUCZx1iPvQI4AmH8IoSwNj5PVhXMfE4I=
 github.com/bluesky-social/indigo v0.0.0-20240621215756-9ee0a266c9ff/go.mod h1:dBIOGhsiK0rgEETnxiGiuEyrSx6DKxEotHIPbiKD6WU=
+github.com/bluesky-social/indigo v0.0.0-20240708212113-308be35ce430 h1:gYAjFIpAcH0GoLZhX6F+xhj2qRzp+Bi3et+eOPzGlh8=
+github.com/bluesky-social/indigo v0.0.0-20240708212113-308be35ce430/go.mod h1:dBIOGhsiK0rgEETnxiGiuEyrSx6DKxEotHIPbiKD6WU=
 github.com/carlmjohnson/versioninfo v0.22.5 h1:O00sjOLUAFxYQjlN/bzYTuZiS0y6fWDQjMRvwtKgwwc=
 github.com/carlmjohnson/versioninfo v0.22.5/go.mod h1:QT9mph3wcVfISUKd0i9sZfVrPviHuSF+cUtLjm2WSf8=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=

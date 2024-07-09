@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.2
-	github.com/bluesky-social/indigo v0.0.0-20240621215756-9ee0a266c9ff
+	github.com/bluesky-social/indigo v0.0.0-20240708212113-308be35ce430
 	github.com/kr/pretty v0.2.0
 	golang.org/x/net v0.26.0
 	golang.org/x/text v0.16.0
