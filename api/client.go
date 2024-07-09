@@ -119,7 +119,7 @@ func getJWTExpiration(atpClient *ATPClient, clientAuthFilePath string) (bool, er
 		return false, fmt.Errorf("error unmarshalling JWT of %s: %w", clientAuthFilePath, err)
 	}
 
-	return time.Now().Unix() >= jwt.Exp, nil
+	return time.Now().Add(time.Minute).Unix() >= jwt.Exp, nil
 }
 
 func createSession(did, appPassword, clientAuthFilePath string, config *Config) (*ATPClient, error) {
