@@ -246,7 +246,8 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 			return nil, fmt.Errorf("error unmarshalling %s: %w", clientAuthFilePath, err)
 		}
 
-		if atpClient.Config != config {
+		if appPassword != atpClient.AppPassword || atpClient.Config != config {
+			atpClient.AppPassword = appPassword
 			atpClient.Config = config
 
 			err = writeAuthFile(clientAuthFilePath, *atpClient)
