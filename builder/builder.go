@@ -186,6 +186,10 @@ func injectFacets(atpClient *api.ATPClient, text string, mentionInput []*Mention
 
 	extractedMentions := util.ExtractMentionsBytes(text)
 	for i, ent := range extractedMentions {
+		if strings.Contains(ent.Text, "@.") {
+			continue
+		}
+
 		if !strings.Contains(ent.Text, ".") {
 			continue
 		}
