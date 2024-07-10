@@ -12,6 +12,7 @@ const (
 
 	errorProfileNotFoundMessage         = "InvalidRequest: Profile not found"
 	errorInvalidActorDidOrHandleMessage = "InvalidRequest: Error: actor must be a valid did or a handle"
+	errorHandleMustBeValidHandle        = "InvalidRequest: Error: handle must be a valid handle"
 	errorAccountDeactivatedMessage      = "AccountDeactivated: Account is deactivated"
 	errorInvalidFollowDIDMessage        = "Record/subject must be a valid did"
 	errorParamMustHavePropActorMessage  = `Params must have the property`
@@ -54,6 +55,10 @@ func IsProfileNotFoundError(err error) bool {
 
 func IsInvalidActorDidOrHandleError(err error) bool {
 	return strings.Contains(err.Error(), errorInvalidActorDidOrHandleMessage)
+}
+
+func IsHandleMustBeValidHandle(err error) bool {
+	return strings.Contains(err.Error(), errorHandleMustBeValidHandle)
 }
 
 func IsAccountDeactivatedError(err error) bool {

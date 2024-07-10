@@ -207,7 +207,9 @@ func injectFacets(atpClient *api.ATPClient, text string, mentionInput []*Mention
 		} else {
 			respDid, err := atpClient.ResolveHandle(ent.Text)
 			if err != nil {
-				if atperr.IsInvalidActorDidOrHandleError(err) || atperr.IsProfileNotFoundError(err) {
+				if atperr.IsInvalidActorDidOrHandleError(err) ||
+					atperr.IsProfileNotFoundError(err) ||
+					atperr.IsHandleMustBeValidHandle(err) {
 					continue
 				} else {
 					return nil, err
