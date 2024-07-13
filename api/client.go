@@ -10,6 +10,7 @@ import (
 	"github.com/bluesky-social/indigo/xrpc"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -33,7 +34,6 @@ type DidDoc struct {
 
 type Config struct {
 	ATProtoEndpoint    string `json:"at_proto_endpoint"`
-	PDSEndpoint        string `json:"pds_endpoint"`
 	ProfilesCollection string `json:"profiles_collection"`
 	PostsCollection    string `json:"posts_collection"`
 	RepostsCollection  string `json:"reposts_collection"`
@@ -92,8 +92,11 @@ func refreshSession(atpClient *ATPClient, clientAuthFilePath string) (*ATPClient
 	atpClient.Client.Auth.AccessJwt = refresh.AccessJwt
 	atpClient.Client.Auth.RefreshJwt = refresh.RefreshJwt
 
-	atpClient.PdsClient.Auth = atpClient.Client.Auth
-	atpClient.LabelerClient.Auth = atpClient.Client.Auth
+	atpClient.PdsClient.Auth.AccessJwt = refresh.AccessJwt
+	atpClient.PdsClient.Auth.RefreshJwt = refresh.RefreshJwt
+
+	atpClient.LabelerClient.Auth.AccessJwt = refresh.AccessJwt
+	atpClient.LabelerClient.Auth.RefreshJwt = refresh.RefreshJwt
 
 	err = writeAuthFile(clientAuthFilePath, *atpClient)
 	if err != nil {
@@ -165,7 +168,6 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 	}
 
 	//PDS CLIENT
-	atpClient.Config.PDSEndpoint = didDoc.Service[0].ServiceEndpoint
 	atpClient.PdsClient = &xrpc.Client{
 		Client: new(http.Client),
 		Host:   didDoc.Service[0].ServiceEndpoint,
@@ -191,6 +193,10 @@ func createSession(did, appPassword, clientAuthFilePath string, config *Config) 
 	if err != nil {
 		return nil, err
 	}
+
+	atpClient.Client.Client = new(http.Client)
+	atpClient.PdsClient.Client = new(http.Client)
+	atpClient.LabelerClient.Client = new(http.Client)
 
 	return atpClient, nil
 }
@@ -240,23 +246,17 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 	}
 
 	if string(fileContent) == "" {
-		atpClient, err = createSession(did, appPassword, clientAuthFilePath, config)
-		if err != nil {
-			return nil, err
-		}
+		return createSession(did, appPassword, clientAuthFilePath, config)
 	} else {
 		if err = json.Unmarshal(fileContent, &atpClient); err != nil {
 			return nil, fmt.Errorf("error unmarshalling %s: %w", clientAuthFilePath, err)
 		}
 
-		if appPassword != atpClient.AppPassword || atpClient.Config != config {
+		if appPassword != atpClient.AppPassword || !reflect.DeepEqual(atpClient.Config, config) {
 			atpClient.AppPassword = appPassword
 			atpClient.Config = config
 
-			err = writeAuthFile(clientAuthFilePath, *atpClient)
-			if err != nil {
-				return nil, err
-			}
+			return createSession(did, appPassword, clientAuthFilePath, config)
 		}
 
 		jwtIsExpired, err := getJWTExpiration(atpClient, clientAuthFilePath)
@@ -274,7 +274,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 				return nil, err
 			}
 		}
-	}
 
-	return atpClient, nil
+		return atpClient, nil
+	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/api/ozone"
+	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/suvpen/suvatp/atperr"
 	"time"
 )
@@ -53,12 +54,41 @@ func (atpClient *ATPClient) QueryLabel(cursor string, limit int64) (*ozone.Moder
 }
 
 func (atpClient *ATPClient) QueryOpenReports(cursor string, limit int64) (*ozone.ModerationQueryStatuses_Output, error) {
-	resp, err := ozone.ModerationQueryStatuses(
-		context.TODO(), atpClient.LabelerClient,
-		false, "", cursor, nil, nil,
-		true, "", limit, "", "",
-		"tools.ozone.moderation.defs#reviewOpen", "", "", "desc", "lastReportedAt",
-		"", nil, false)
+	//TODO: uncomment if fixed
+	//resp, err := ozone.ModerationQueryStatuses(
+	//	context.TODO(), atpClient.LabelerClient,
+	//	false, "", cursor, nil, nil,
+	//	true, "", limit, false, "", "",
+	//	"tools.ozone.moderation.defs#reviewOpen", "", "", "desc", "lastReportedAt",
+	//	"", nil, false)
+	//if err != nil {
+	//	if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+	//		if atpClient.RetryCount != atpClient.Config.Retries {
+	//			atpClient.RetryCount++
+	//			time.Sleep(time.Second * 3)
+	//			return atpClient.QueryOpenReports(cursor, limit)
+	//		} else {
+	//			return nil, fmt.Errorf("error querying open reports: %w", err)
+	//		}
+	//	} else {
+	//		return nil, fmt.Errorf("error querying open reports: %w", err)
+	//	}
+	//}
+
+	params := map[string]interface{}{
+		"cursor":        cursor,
+		"includeMuted":  true,
+		"limit":         limit,
+		"onlyMuted":     false,
+		"reviewState":   "tools.ozone.moderation.defs#reviewOpen",
+		"sortDirection": "desc",
+		"sortField":     "lastReportedAt",
+	}
+
+	var resp *ozone.ModerationQueryStatuses_Output
+
+	err := atpClient.LabelerClient.Do(
+		context.TODO(), xrpc.Query, "", "tools.ozone.moderation.queryStatuses", params, nil, resp)
 	if err != nil {
 		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
 			if atpClient.RetryCount != atpClient.Config.Retries {
