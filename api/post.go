@@ -7,6 +7,7 @@ import (
 	"github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/api/bsky"
 	lexutil "github.com/bluesky-social/indigo/lex/util"
+	"github.com/suvpen/suvatp/atperr"
 	"net/http"
 	"os"
 	"time"
@@ -16,8 +17,20 @@ func (atpClient *ATPClient) GetPost(didOrHandle, rKey string) (*atproto.RepoGetR
 	resp, err := atproto.RepoGetRecord(
 		context.TODO(), atpClient.Client, "", atpClient.Config.PostsCollection, didOrHandle, rKey)
 	if err != nil {
-		return nil, fmt.Errorf("error getting record: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetPost(didOrHandle, rKey)
+			} else {
+				return nil, fmt.Errorf("error getting post record: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting post record: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -33,8 +46,20 @@ func (atpClient *ATPClient) GetPostThread(
 	resp, err := bsky.FeedGetPostThread(
 		context.TODO(), atpClient.Client, depth, parentHeight, postRecord.Uri)
 	if err != nil {
-		return nil, fmt.Errorf("error getting post thread: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetPostThread(didOrHandle, rKey, depth, parentHeight)
+			} else {
+				return nil, fmt.Errorf("error getting post thread: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting post thread: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -55,8 +80,20 @@ func (atpClient *ATPClient) GetAuthorFeed(did, cursor, filter string, limit int6
 
 	resp, err := bsky.FeedGetAuthorFeed(context.TODO(), atpClient.Client, did, cursor, filter, limit)
 	if err != nil {
-		return nil, fmt.Errorf("error getting %s feed: %w", did, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetAuthorFeed(did, cursor, filter, limit)
+			} else {
+				return nil, fmt.Errorf("error getting %s feed: %w", did, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting %s feed: %w", did, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -70,8 +107,20 @@ func (atpClient *ATPClient) GetRepostedBy(didOrHandle, rKey, cursor string) (*bs
 	resp, err := bsky.FeedGetRepostedBy(
 		context.TODO(), atpClient.Client, *postRecord.Cid, cursor, 100, postRecord.Uri)
 	if err != nil {
-		return nil, fmt.Errorf("error getting repostedby: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetRepostedBy(didOrHandle, rKey, cursor)
+			} else {
+				return nil, fmt.Errorf("error getting repostedby: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting repostedby: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -85,8 +134,20 @@ func (atpClient *ATPClient) GetLikes(didOrHandle, rKey, cursor string) (*bsky.Fe
 	resp, err := bsky.FeedGetLikes(
 		context.TODO(), atpClient.Client, *postRecord.Cid, cursor, 100, postRecord.Uri)
 	if err != nil {
-		return nil, fmt.Errorf("error getting %s likes: %w", postRecord.Uri, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetLikes(didOrHandle, rKey, cursor)
+			} else {
+				return nil, fmt.Errorf("error getting %s likes: %w", postRecord.Uri, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting %s likes: %w", postRecord.Uri, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -97,8 +158,20 @@ func (atpClient *ATPClient) SearchPost(q, cursor string, limit int64) (*bsky.Fee
 		limit, "", q, "", "",
 		nil, "", "")
 	if err != nil {
-		return nil, fmt.Errorf("error getting record: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.SearchPost(q, cursor, limit)
+			} else {
+				return nil, fmt.Errorf("error searching post: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error searching post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -112,8 +185,20 @@ func (atpClient *ATPClient) Post(post *bsky.FeedPost) (*atproto.RepoCreateRecord
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error creating post: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Post(post)
+			} else {
+				return nil, fmt.Errorf("error creating post: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error creating post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -132,8 +217,20 @@ func (atpClient *ATPClient) ReplyPost(cid, uri string, post *bsky.FeedPost) (*at
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error replying post: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.ReplyPost(cid, uri, post)
+			} else {
+				return nil, fmt.Errorf("error replying post: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error replying post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -145,8 +242,20 @@ func (atpClient *ATPClient) DeletePost(rKey string) error {
 		Rkey:       rKey,
 	})
 	if err != nil {
-		return fmt.Errorf("error deleting post: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.DeletePost(rKey)
+			} else {
+				return fmt.Errorf("error deleting post: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error deleting post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }
@@ -171,8 +280,20 @@ func (atpClient *ATPClient) Repost(didOrHandle, rKey string) (*atproto.RepoCreat
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error reposting post: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Repost(didOrHandle, rKey)
+			} else {
+				return nil, fmt.Errorf("error reposting post: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error reposting post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return repostResp, nil
 }
@@ -184,8 +305,20 @@ func (atpClient *ATPClient) UndoRepost(rKey string) error {
 		Rkey:       rKey,
 	})
 	if err != nil {
-		return fmt.Errorf("error undoing repost: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.UndoRepost(rKey)
+			} else {
+				return fmt.Errorf("error undoing repost: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error undoing repost: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }
@@ -210,8 +343,20 @@ func (atpClient *ATPClient) Like(didOrHandle, rKey string) (*atproto.RepoCreateR
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error liking post: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Like(didOrHandle, rKey)
+			} else {
+				return nil, fmt.Errorf("error liking post: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error liking post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return repostResp, nil
 }
@@ -223,8 +368,20 @@ func (atpClient *ATPClient) Unlike(rKey string) error {
 		Rkey:       rKey,
 	})
 	if err != nil {
-		return fmt.Errorf("error unliking post: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Unlike(rKey)
+			} else {
+				return fmt.Errorf("error unliking post: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error unliking post: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }
@@ -243,7 +400,16 @@ func (atpClient *ATPClient) UploadImages(imagePaths []string) ([]*bsky.EmbedImag
 
 		resp, err := atproto.RepoUploadBlob(context.TODO(), atpClient.Client, bytes.NewReader(imgData))
 		if err != nil {
-			return nil, fmt.Errorf("error uploading image: cannot upload image file: %w", err)
+			if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+				time.Sleep(time.Second * 3)
+
+				resp, err = atproto.RepoUploadBlob(context.TODO(), atpClient.Client, bytes.NewReader(imgData))
+				if err != nil {
+					return nil, fmt.Errorf("error uploading image: cannot upload image: %w", err)
+				}
+			} else {
+				return nil, fmt.Errorf("error uploading image: cannot upload image: %w", err)
+			}
 		}
 
 		images = append(images, &bsky.EmbedImages_Image{
@@ -254,6 +420,8 @@ func (atpClient *ATPClient) UploadImages(imagePaths []string) ([]*bsky.EmbedImag
 			},
 		})
 	}
+
+	atpClient.RetryCount = 0
 
 	return images, nil
 }

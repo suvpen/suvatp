@@ -57,7 +57,7 @@ func IsInvalidActorDidOrHandleError(err error) bool {
 	return strings.Contains(err.Error(), errorInvalidActorDidOrHandleMessage)
 }
 
-func IsHandleMustBeValidHandle(err error) bool {
+func IsHandleMustBeValidHandleError(err error) bool {
 	return strings.Contains(err.Error(), errorHandleMustBeValidHandle)
 }
 

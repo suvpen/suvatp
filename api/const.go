@@ -13,6 +13,7 @@ const (
 	DefaultGraphFollowLexicon = "app.bsky.graph.follow"
 	DefaultGraphBlockLexicon  = "app.bsky.graph.block"
 	DefaultLabelerService     = "app.bsky.labeler.service"
+	DefaultRetries            = 1
 )
 
 const (

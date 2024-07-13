@@ -5,12 +5,24 @@ import (
 	"fmt"
 	"github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/api/ozone"
+	"github.com/suvpen/suvatp/atperr"
+	"time"
 )
 
 func (atpClient *ATPClient) SearchRepos(q, cursor string, limit int64) (*ozone.ModerationSearchRepos_Output, error) {
 	resp, err := ozone.ModerationSearchRepos(context.TODO(), atpClient.LabelerClient, cursor, limit, q, "")
 	if err != nil {
-		return nil, fmt.Errorf("error while searching repos of %s: %w", q, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.SearchRepos(q, cursor, limit)
+			} else {
+				return nil, fmt.Errorf("error while searching repos of %s: %w", q, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error while searching repos of %s: %w", q, err)
+		}
 	}
 
 	return resp, nil
@@ -24,7 +36,17 @@ func (atpClient *ATPClient) QueryLabel(cursor string, limit int64) (*ozone.Moder
 		nil, nil, nil, "", "",
 		[]string{"tools.ozone.moderation.defs#modEventLabel"})
 	if err != nil {
-		return nil, fmt.Errorf("error querying label events: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.QueryLabel(cursor, limit)
+			} else {
+				return nil, fmt.Errorf("error querying label events: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error querying label events: %w", err)
+		}
 	}
 
 	return resp, nil
@@ -38,7 +60,17 @@ func (atpClient *ATPClient) QueryOpenReports(cursor string, limit int64) (*ozone
 		"tools.ozone.moderation.defs#reviewOpen", "", "", "desc", "lastReportedAt",
 		"", nil, false)
 	if err != nil {
-		return nil, fmt.Errorf("error querying open reports: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.QueryOpenReports(cursor, limit)
+			} else {
+				return nil, fmt.Errorf("error querying open reports: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error querying open reports: %w", err)
+		}
 	}
 
 	return resp, nil
@@ -52,7 +84,17 @@ func (atpClient *ATPClient) QueryEventDetail(subject string) (*ozone.ModerationQ
 		nil, nil, nil, "", subject,
 		nil)
 	if err != nil {
-		return nil, fmt.Errorf("error querying label events: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.QueryEventDetail(subject)
+			} else {
+				return nil, fmt.Errorf("error querying label events: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error querying label events: %w", err)
+		}
 	}
 
 	return resp, nil
@@ -76,7 +118,17 @@ func (atpClient *ATPClient) LabelAccount(adminDid, targetDid, label string) (*oz
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.LabelAccount(adminDid, targetDid, label)
+			} else {
+				return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+		}
 	}
 
 	return resp, nil
@@ -101,7 +153,17 @@ func (atpClient *ATPClient) LabelPost(adminDid, cid, uri, label string) (*ozone.
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error labeling post %s: %w", uri, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.LabelPost(adminDid, cid, uri, label)
+			} else {
+				return nil, fmt.Errorf("error labeling post %s: %w", uri, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error labeling post %s: %w", uri, err)
+		}
 	}
 
 	return resp, nil
@@ -125,7 +187,17 @@ func (atpClient *ATPClient) NegateAccountLabel(adminDid, targetDid, label string
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.NegateAccountLabel(adminDid, targetDid, label)
+			} else {
+				return nil, fmt.Errorf("error unlabeling %s: %w", targetDid, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error unlabeling %s: %w", targetDid, err)
+		}
 	}
 
 	return resp, nil
@@ -150,7 +222,17 @@ func (atpClient *ATPClient) NegatePostLabel(adminDid, cid, uri, label string) (*
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error labeling post %s: %w", uri, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.NegatePostLabel(adminDid, cid, uri, label)
+			} else {
+				return nil, fmt.Errorf("error unlabeling post %s: %w", uri, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error unlabeling post %s: %w", uri, err)
+		}
 	}
 
 	return resp, nil
@@ -171,7 +253,17 @@ func (atpClient *ATPClient) AcknowledgeAccountRecord(adminDid, targetDid string)
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error acknowledging %s account record: %w", targetDid, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.AcknowledgeAccountRecord(adminDid, targetDid)
+			} else {
+				return nil, fmt.Errorf("error acknowledging %s account record: %w", targetDid, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error acknowledging %s account record: %w", targetDid, err)
+		}
 	}
 
 	return resp, nil
@@ -193,7 +285,17 @@ func (atpClient *ATPClient) AcknowledgePostRecord(adminDid, cid, uri string) (*o
 
 	resp, err := ozone.ModerationEmitEvent(context.TODO(), atpClient.LabelerClient, eventInput)
 	if err != nil {
-		return nil, fmt.Errorf("error acknowledging %s post record: %w", uri, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.AcknowledgePostRecord(adminDid, cid, uri)
+			} else {
+				return nil, fmt.Errorf("error acknowledging %s post record: %w", uri, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error acknowledging %s post record: %w", uri, err)
+		}
 	}
 
 	return resp, nil

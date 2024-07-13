@@ -6,6 +6,7 @@ import (
 	"github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/api/bsky"
 	lexutil "github.com/bluesky-social/indigo/lex/util"
+	"github.com/suvpen/suvatp/atperr"
 	"github.com/suvpen/suvatp/util"
 	"strings"
 	"time"
@@ -14,8 +15,20 @@ import (
 func (atpClient *ATPClient) GetPreferences() (*bsky.ActorGetPreferences_Output, error) {
 	resp, err := bsky.ActorGetPreferences(context.TODO(), atpClient.Client)
 	if err != nil {
-		return nil, fmt.Errorf("error getting preferences: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetPreferences()
+			} else {
+				return nil, fmt.Errorf("error getting preferences: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting preferences: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -42,8 +55,20 @@ func (atpClient *ATPClient) SubscribeLabeler(did string) error {
 
 	err = bsky.ActorPutPreferences(context.TODO(), atpClient.Client, input)
 	if err != nil {
-		return fmt.Errorf("error subscribing preferences: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.SubscribeLabeler(did)
+			} else {
+				return fmt.Errorf("error subscribing preferences: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error subscribing preferences: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }
@@ -63,8 +88,20 @@ func (atpClient *ATPClient) LikeLabeler(cid, did string) (*atproto.RepoCreateRec
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error liking labeler: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.LikeLabeler(cid, did)
+			} else {
+				return nil, fmt.Errorf("error liking labeler: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error liking labeler: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return repostResp, nil
 }
@@ -72,8 +109,20 @@ func (atpClient *ATPClient) LikeLabeler(cid, did string) (*atproto.RepoCreateRec
 func (atpClient *ATPClient) ResolveHandle(handle string) (string, error) {
 	resp, err := atproto.IdentityResolveHandle(context.TODO(), atpClient.Client, handle)
 	if err != nil {
-		return "", fmt.Errorf("error get %s handle: %w", handle, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.ResolveHandle(handle)
+			} else {
+				return "", fmt.Errorf("error resolving %s handle: %w", handle, err)
+			}
+		} else {
+			return "", fmt.Errorf("error resolving %s handle: %w", handle, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp.Did, nil
 }
@@ -81,8 +130,20 @@ func (atpClient *ATPClient) ResolveHandle(handle string) (string, error) {
 func (atpClient *ATPClient) GetProfile(didOrHandle string) (*bsky.ActorDefs_ProfileViewDetailed, error) {
 	profile, err := bsky.ActorGetProfile(context.TODO(), atpClient.Client, didOrHandle)
 	if err != nil {
-		return nil, fmt.Errorf("error get %s profile: %w", didOrHandle, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetProfile(didOrHandle)
+			} else {
+				return nil, fmt.Errorf("error getting %s profile: %w", didOrHandle, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting %s profile: %w", didOrHandle, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return profile, nil
 }
@@ -90,8 +151,20 @@ func (atpClient *ATPClient) GetProfile(didOrHandle string) (*bsky.ActorDefs_Prof
 func (atpClient *ATPClient) SearchActors(q, cursor string, limit int64) (*bsky.ActorSearchActors_Output, error) {
 	profile, err := bsky.ActorSearchActors(context.TODO(), atpClient.Client, cursor, limit, q, "")
 	if err != nil {
-		return nil, fmt.Errorf("error searching actors with q=%s: %w", q, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.SearchActors(q, cursor, limit)
+			} else {
+				return nil, fmt.Errorf("error searching actors with q=%s: %w", q, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error searching actors with q=%s: %w", q, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return profile, nil
 }
@@ -99,8 +172,20 @@ func (atpClient *ATPClient) SearchActors(q, cursor string, limit int64) (*bsky.A
 func (atpClient *ATPClient) GetFollows(cursor string) (*bsky.GraphGetFollows_Output, error) {
 	follows, err := bsky.GraphGetFollows(context.TODO(), atpClient.Client, atpClient.Client.Auth.Did, cursor, 100)
 	if err != nil {
-		return nil, fmt.Errorf("error getting follows: %w", err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.GetFollows(cursor)
+			} else {
+				return nil, fmt.Errorf("error getting follows: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("error getting follows: %w", err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return follows, nil
 }
@@ -122,8 +207,20 @@ func (atpClient *ATPClient) FollowDid(did string) (*atproto.RepoCreateRecord_Out
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error following DID %s: %w", did, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.FollowDid(did)
+			} else {
+				return nil, fmt.Errorf("error following DID %s: %w", did, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error following DID %s: %w", did, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -158,8 +255,20 @@ func (atpClient *ATPClient) Unfollow(didOrHandle string) error {
 		Rkey:       folRecord.RecordKey,
 	})
 	if err != nil {
-		return fmt.Errorf("error unfollowing DID %s: %w", didOrHandle, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Unfollow(didOrHandle)
+			} else {
+				return fmt.Errorf("error unfollowing DID %s: %w", didOrHandle, err)
+			}
+		} else {
+			return fmt.Errorf("error unfollowing DID %s: %w", didOrHandle, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }
@@ -167,8 +276,20 @@ func (atpClient *ATPClient) Unfollow(didOrHandle string) error {
 func (atpClient *ATPClient) MuteDid(did string) error {
 	err := bsky.GraphMuteActor(context.TODO(), atpClient.Client, &bsky.GraphMuteActor_Input{Actor: did})
 	if err != nil {
-		return fmt.Errorf("error muting DID %s: %w", did, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Unfollow(did)
+			} else {
+				return fmt.Errorf("error muting DID %s: %w", did, err)
+			}
+		} else {
+			return fmt.Errorf("error muting DID %s: %w", did, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }
@@ -195,8 +316,20 @@ func (atpClient *ATPClient) BlockDid(did string) (*atproto.RepoCreateRecord_Outp
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error blocking DID %s: %w", did, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.BlockDid(did)
+			} else {
+				return nil, fmt.Errorf("error blocking DID %s: %w", did, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error blocking DID %s: %w", did, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -231,8 +364,20 @@ func (atpClient *ATPClient) Unblock(didOrHandle string) error {
 		Rkey:       blockRecord.RecordKey,
 	})
 	if err != nil {
-		return fmt.Errorf("error unblocking DID %s: %w", didOrHandle, err)
+		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
+			if atpClient.RetryCount != atpClient.Config.Retries {
+				atpClient.RetryCount++
+				time.Sleep(time.Second * 3)
+				return atpClient.Unblock(didOrHandle)
+			} else {
+				return fmt.Errorf("error unblocking %s: %w", didOrHandle, err)
+			}
+		} else {
+			return fmt.Errorf("error unblocking %s: %w", didOrHandle, err)
+		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return nil
 }

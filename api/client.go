@@ -41,6 +41,7 @@ type Config struct {
 	GraphFollowLexicon string `json:"graph_follow_lexicon"`
 	GraphBlockLexicon  string `json:"graph_block_lexicon"`
 	LabelerService     string `json:"labeler_service"`
+	Retries            int    `json:"retries"`
 }
 
 type ATPClient struct {
@@ -50,6 +51,7 @@ type ATPClient struct {
 	LabelerClient *xrpc.Client
 	Did           string
 	AppPassword   string
+	RetryCount    int
 }
 
 type Jwt struct {
@@ -223,6 +225,7 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 			GraphFollowLexicon: DefaultGraphFollowLexicon,
 			GraphBlockLexicon:  DefaultGraphBlockLexicon,
 			LabelerService:     DefaultLabelerService,
+			Retries:            DefaultRetries,
 		}
 	}
 
