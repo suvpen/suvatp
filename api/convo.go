@@ -24,6 +24,8 @@ func (atpClient *ATPClient) GetConvoForMembers(targetDid string) (*chat.ConvoGet
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -44,6 +46,8 @@ func (atpClient *ATPClient) ListConvos(cursor string, limit int64) (*chat.ConvoL
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -62,6 +66,8 @@ func (atpClient *ATPClient) GetLog(cursor string) (*chat.ConvoGetLog_Output, err
 			return nil, fmt.Errorf("error getting chat log: %w", err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -82,6 +88,8 @@ func (atpClient *ATPClient) SendMessage(msgInput *chat.ConvoSendMessage_Input) (
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -100,6 +108,8 @@ func (atpClient *ATPClient) SendMessageBatch(msgBatchInput *chat.ConvoSendMessag
 			return nil, fmt.Errorf("error sending message batch: %w", err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }

@@ -26,6 +26,8 @@ func (atpClient *ATPClient) SearchRepos(q, cursor string, limit int64) (*ozone.M
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -49,6 +51,8 @@ func (atpClient *ATPClient) QueryLabel(cursor string, limit int64) (*ozone.Moder
 			return nil, fmt.Errorf("error querying label events: %w", err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -103,6 +107,8 @@ func (atpClient *ATPClient) QueryOpenReports(cursor string, limit int64) (*ozone
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -126,6 +132,8 @@ func (atpClient *ATPClient) QueryEventDetail(subject string) (*ozone.ModerationQ
 			return nil, fmt.Errorf("error querying label events: %w", err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -160,6 +168,8 @@ func (atpClient *ATPClient) LabelAccount(adminDid, targetDid, label string) (*oz
 			return nil, fmt.Errorf("error labeling %s: %w", targetDid, err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -196,6 +206,8 @@ func (atpClient *ATPClient) LabelPost(adminDid, cid, uri, label string) (*ozone.
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -229,6 +241,8 @@ func (atpClient *ATPClient) NegateAccountLabel(adminDid, targetDid, label string
 			return nil, fmt.Errorf("error unlabeling %s: %w", targetDid, err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -265,6 +279,8 @@ func (atpClient *ATPClient) NegatePostLabel(adminDid, cid, uri, label string) (*
 		}
 	}
 
+	atpClient.RetryCount = 0
+
 	return resp, nil
 }
 
@@ -295,6 +311,8 @@ func (atpClient *ATPClient) AcknowledgeAccountRecord(adminDid, targetDid string)
 			return nil, fmt.Errorf("error acknowledging %s account record: %w", targetDid, err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
@@ -327,6 +345,8 @@ func (atpClient *ATPClient) AcknowledgePostRecord(adminDid, cid, uri string) (*o
 			return nil, fmt.Errorf("error acknowledging %s post record: %w", uri, err)
 		}
 	}
+
+	atpClient.RetryCount = 0
 
 	return resp, nil
 }
