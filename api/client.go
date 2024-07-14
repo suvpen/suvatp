@@ -95,7 +95,7 @@ func refreshSession(atpClient *ATPClient, clientAuthFilePath string) (*ATPClient
 	atpClient.PdsClient.Auth.AccessJwt = refresh.AccessJwt
 	atpClient.PdsClient.Auth.RefreshJwt = refresh.RefreshJwt
 
-	if atpClient.LabelerClient != nil {
+	if atpClient.LabelerClient.Auth != nil {
 		atpClient.LabelerClient.Auth.AccessJwt = refresh.AccessJwt
 		atpClient.LabelerClient.Auth.RefreshJwt = refresh.RefreshJwt
 	}
