@@ -95,8 +95,10 @@ func refreshSession(atpClient *ATPClient, clientAuthFilePath string) (*ATPClient
 	atpClient.PdsClient.Auth.AccessJwt = refresh.AccessJwt
 	atpClient.PdsClient.Auth.RefreshJwt = refresh.RefreshJwt
 
-	atpClient.LabelerClient.Auth.AccessJwt = refresh.AccessJwt
-	atpClient.LabelerClient.Auth.RefreshJwt = refresh.RefreshJwt
+	if atpClient.LabelerClient != nil {
+		atpClient.LabelerClient.Auth.AccessJwt = refresh.AccessJwt
+		atpClient.LabelerClient.Auth.RefreshJwt = refresh.RefreshJwt
+	}
 
 	err = writeAuthFile(clientAuthFilePath, *atpClient)
 	if err != nil {
@@ -264,16 +266,16 @@ func Client(did, appPassword string, config *Config) (*ATPClient, error) {
 			return nil, err
 		}
 
-		atpClient.Client.Client = new(http.Client)
-		atpClient.PdsClient.Client = new(http.Client)
-		atpClient.LabelerClient.Client = new(http.Client)
-
 		if jwtIsExpired {
 			atpClient, err = refreshSession(atpClient, clientAuthFilePath)
 			if err != nil {
 				return nil, err
 			}
 		}
+
+		atpClient.Client.Client = new(http.Client)
+		atpClient.PdsClient.Client = new(http.Client)
+		atpClient.LabelerClient.Client = new(http.Client)
 
 		return atpClient, nil
 	}
