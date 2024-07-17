@@ -92,7 +92,7 @@ func (atpClient *ATPClient) QueryOpenReports(cursor string, limit int64) (*ozone
 	var resp *ozone.ModerationQueryStatuses_Output
 
 	err := atpClient.LabelerClient.Do(
-		context.TODO(), xrpc.Query, "", "tools.ozone.moderation.queryStatuses", params, nil, resp)
+		context.TODO(), xrpc.Query, "", "tools.ozone.moderation.queryStatuses", params, nil, &resp)
 	if err != nil {
 		if atperr.IsUpstreamFailureError(err) || atperr.IsUpstreamTimeoutError(err) || atperr.IsInternalServerError(err) {
 			if atpClient.RetryCount != atpClient.Config.Retries {
