@@ -13,9 +13,10 @@ const (
 	errorProfileNotFound         = "InvalidRequest: Profile not found"
 	errorInvalidActorDidOrHandle = "InvalidRequest: Error: actor must be a valid did or a handle"
 	errorHandleMustBeValidHandle = "InvalidRequest: Error: handle must be a valid handle"
+	errorParamMustHavePropHandle = `InvalidRequest: Error: Params must have the property "handle"`
+	errorParamMustHavePropActor  = `InvalidRequest: Error: Params must have the property "actor"`
 	errorAccountDeactivated      = "AccountDeactivated: Account is deactivated"
 	errorInvalidFollowDid        = "Record/subject must be a valid did"
-	errorParamMustHavePropHandle = `InvalidRequest: Error: Params must have the property "handle"`
 
 	errorRecipientNotFollowingYou = "InvalidRequest: recipient requires incoming messages to come from someone they follow"
 
@@ -61,16 +62,20 @@ func IsHandleMustBeValidHandleError(err error) bool {
 	return strings.Contains(err.Error(), errorHandleMustBeValidHandle)
 }
 
+func IsParamMustHavePropHandleError(err error) bool {
+	return strings.Contains(err.Error(), errorParamMustHavePropHandle)
+}
+
+func IsParamMustHavePropActorError(err error) bool {
+	return strings.Contains(err.Error(), errorParamMustHavePropActor)
+}
+
 func IsAccountDeactivatedError(err error) bool {
 	return strings.Contains(err.Error(), errorAccountDeactivated)
 }
 
 func IsInvalidFollowDidError(err error) bool {
 	return strings.Contains(err.Error(), errorInvalidFollowDid)
-}
-
-func IsParamMustHavePropHandleError(err error) bool {
-	return strings.Contains(err.Error(), errorParamMustHavePropHandle)
 }
 
 func IsRecipientNotFollowingYouError(err error) bool {
